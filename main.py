@@ -1,12 +1,33 @@
 # main.py
 import sys
+import os
 from PyQt6.QtWidgets import QApplication, QMessageBox
-from services.auth_service import AuthService
-from ui.login_dialog import LoginDialog
-from controllers.main_controller import MainController
+
+def init_database():
+    """Initialize database if it doesn't exist."""
+    from database.db_connection import engine, DB_PATH
+    from models.base import Base
+    from models.order import Order
+    from models.user import User
+    from models.warehouse import Warehouse, OrderWarehouseHistory
+    from models.route import Route
+    from models.order_status_history import OrderStatusHistory
+    
+    # Create database tables if they don't exist
+    if not os.path.exists(DB_PATH):
+        print("First run - Creating database...")
+    
+    Base.metadata.create_all(bind=engine)
 
 def main():
     app = QApplication(sys.argv)
+    
+    # Auto-initialize database on first run
+    init_database()
+    
+    from services.auth_service import AuthService
+    from ui.login_dialog import LoginDialog
+    from controllers.main_controller import MainController
     
     # Initialize Auth Service
     auth_service = AuthService()
