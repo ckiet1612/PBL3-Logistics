@@ -1,5 +1,5 @@
 # ui/login_dialog.py
-from PyQt6.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QLabel, 
+from PyQt6.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QLabel,
                               QLineEdit, QPushButton, QMessageBox)
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QFont
@@ -9,11 +9,11 @@ class LoginDialog(QDialog):
         super().__init__(parent)
         self.auth_service = auth_service
         self.user_data = None
-        
+
         self.setWindowTitle("Đăng nhập - Logistics System")
         self.setFixedSize(400, 250)
         self.setModal(True)
-        
+
         self.setup_ui()
 
     def setup_ui(self):
@@ -73,7 +73,7 @@ class LoginDialog(QDialog):
             return
 
         success, result = self.auth_service.authenticate(username, password)
-        
+
         if success:
             self.user_data = result
             self.accept()

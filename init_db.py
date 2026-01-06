@@ -13,7 +13,7 @@ try:
     # This command will find all classes that inherit from Base and create the corresponding table
     Base.metadata.create_all(bind=engine)
     print("Success! Database tables have been created.")
-    
+
     # Create default admin account
     from services.auth_service import AuthService
     auth_service = AuthService()
@@ -21,6 +21,6 @@ try:
         print("Default admin account created: admin / admin123")
     else:
         print("Admin account already exists.")
-        
+
 except Exception as e:
     print(f"An error occurred: {e}")

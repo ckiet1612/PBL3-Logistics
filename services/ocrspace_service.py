@@ -8,9 +8,9 @@ class OCRSpaceService:
     Cloud-based OCR Service using OCR.space API.
     Supports Vietnamese text recognition.
     """
-    
+
     API_ENDPOINT = "https://api.ocr.space/parse/image"
-    
+
     # Full list of Vietnam provinces
     VIETNAM_PROVINCES = [
         "Hà Nội", "TP. Hồ Chí Minh", "Hải Phòng", "Đà Nẵng", "Cần Thơ", "Huế",
@@ -35,20 +35,20 @@ class OCRSpaceService:
         api_key = os.environ.get('OCRSPACE_API_KEY')
         if api_key:
             return api_key
-        
+
         # Try config file
         config_paths = [
             'ocrspace_config.txt',
             os.path.join(os.path.dirname(__file__), '..', 'ocrspace_config.txt')
         ]
-        
+
         for path in config_paths:
             if os.path.exists(path):
                 with open(path, 'r') as f:
                     key = f.read().strip()
                     if key:
                         return key
-        
+
         return None
 
     def extract_text(self, image_path, lang='vie'):
@@ -56,10 +56,10 @@ class OCRSpaceService:
         if not self.api_key:
             print("Error: API Key not configured!")
             return None
-        
+
         try:
             print(f"Đang gửi ảnh lên OCR.space...")
-            
+
             with open(image_path, 'rb') as f:
                 payload = {
                     'apikey': self.api_key,
@@ -69,39 +69,39 @@ class OCRSpaceService:
                     'scale': True,
                     'OCREngine': 2  # Engine 2 is better for Asian languages
                 }
-                
+
                 files = {
                     'file': f
                 }
-                
+
                 response = requests.post(
                     self.API_ENDPOINT,
                     data=payload,
                     files=files,
                     timeout=30
                 )
-            
+
             result = response.json()
-            
+
             if result.get('IsErroredOnProcessing'):
                 error_msg = result.get('ErrorMessage', ['Unknown error'])
                 print(f"OCR.space Error: {error_msg}")
                 return None
-            
+
             # Extract text from all parsed results
             parsed_results = result.get('ParsedResults', [])
             if not parsed_results:
                 print("Không tìm thấy text trong ảnh!")
                 return None
-            
+
             raw_text = parsed_results[0].get('ParsedText', '')
-            
+
             print("\n----- OCR.space RAW OUTPUT START -----")
             print(raw_text)
             print("----- OCR.space RAW OUTPUT END -----\n")
-            
+
             return raw_text
-            
+
         except requests.exceptions.Timeout:
             print("Error: Request timeout!")
             return None
@@ -116,16 +116,16 @@ class OCRSpaceService:
         """Parse order information with flexible patterns for OCR errors."""
         if not raw_text:
             return self._get_empty_info()
-        
+
         info = self._get_empty_info()
         lines = raw_text.split('\n')
-        
+
         def find_province(text):
             text_lower = text.lower()
             for prov in self.VIETNAM_PROVINCES:
                 if prov.lower() in text_lower:
                     return prov
-            
+
             # Heuristic for common OCR errors
             if 'nẵng' in text_lower and 'đà' in text_lower:
                 return "Đà Nẵng"
@@ -137,16 +137,16 @@ class OCRSpaceService:
 
         # --- SECTION DETECTION ---
         current_section = "sender"
-        
+
         for i, line in enumerate(lines):
             line_lower = line.lower()
-            
+
             # Switch section
             if 'người nhận' in line_lower:
                 current_section = "receiver"
             elif 'người gửi' in line_lower:
                 current_section = "sender"
-                
+
             # --- NAME ---
             if 'người' in line_lower and ('gửi' in line_lower or 'nhận' in line_lower) and ':' in line:
                 parts = line.split(':', 1)
@@ -195,7 +195,7 @@ class OCRSpaceService:
                             info["sender_address"] = addr_content
                         elif current_section == "receiver" and not info["receiver_address"]:
                             info["receiver_address"] = addr_content
-            
+
             # --- PROVINCE ---
             prov = find_province(line)
             if prov:
@@ -203,7 +203,7 @@ class OCRSpaceService:
                     info["sender_province"] = prov
                 elif current_section == "receiver" and not info["receiver_province"]:
                     info["receiver_province"] = prov
-            
+
             # --- WARD (Xã/Phường) ---
             # Look for ward patterns: "Phường X", "Xã Y", "TT. Z"
             ward_match = re.search(r'(Phường|Xã|TT\.|Thị trấn)\s+[\w\s]+', line, re.IGNORECASE)
@@ -238,7 +238,7 @@ class OCRSpaceService:
                     try:
                         info["package_count"] = int(numbers[0])
                     except: pass
-            
+
             # --- SHIPPING COST ---
             if 'phí vận' in line_lower or 'cước' in line_lower:
                 numbers = re.findall(r'[\d\.,]+', line)
@@ -249,7 +249,7 @@ class OCRSpaceService:
                             info["shipping_cost"] = val
                             break
                     except: pass
-            
+
             # --- COD ---
             if 'thu hộ' in line_lower or 'cod' in line_lower:
                 numbers = re.findall(r'[\d\.,]+', line)
@@ -268,13 +268,13 @@ class OCRSpaceService:
                 if ':' in line:
                     parts = line.split(':', 1)
                     content = parts[1].strip()
-                
+
                 # Check next line for continuation
                 if i + 1 < len(lines):
                     next_line = lines[i+1].strip()
                     if ':' not in next_line and not re.match(r'^[\d\.\s]+(vnđ|vnd)?$', next_line.lower()):
                         content += " " + next_line
-                
+
                 if len(content) > 3:
                     info["delivery_note"] = content
 

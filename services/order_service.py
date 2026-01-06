@@ -104,7 +104,7 @@ class OrderService:
             'cod_amount': order.cod_amount,
             'status': order.status
         }
-    
+
     def search_orders(self, query: str):
         """
         Search orders by multiple fields.
@@ -115,9 +115,9 @@ class OrderService:
         try:
             if not query or not query.strip():
                 return self.get_all_orders()
-            
+
             search_pattern = f"%{query.strip()}%"
-            
+
             orders = session.query(Order).filter(
                 (Order.id.like(search_pattern)) |
                 (Order.sender_name.ilike(search_pattern)) |
@@ -128,14 +128,14 @@ class OrderService:
                 (Order.receiver_address.ilike(search_pattern)) |
                 (Order.item_name.ilike(search_pattern))
             ).all()
-            
+
             return orders
         except Exception as e:
             print(f"Error searching orders: {e}")
             return []
         finally:
             session.close()
-    
+
     def filter_orders(self, search_query: str = "", status: str = "", days: int = 0, province: str = ""):
         """
         Filter orders by multiple criteria.
@@ -147,21 +147,21 @@ class OrderService:
         """
         from datetime import datetime, timedelta
         from sqlalchemy import and_, or_
-        
+
         session: Session = SessionLocal()
         try:
             query = session.query(Order)
             conditions = []
-            
+
             # Status filter
             if status and status != "Tất cả trạng thái":
                 conditions.append(Order.status == status)
-            
+
             # Date filter
             if days > 0:
                 cutoff_date = datetime.now() - timedelta(days=days)
                 conditions.append(Order.created_at >= cutoff_date)
-            
+
             # Province filter (check both sender and receiver)
             if province and province != "Tất cả tỉnh thành":
                 conditions.append(
@@ -170,7 +170,7 @@ class OrderService:
                         Order.receiver_province.ilike(f"%{province}%")
                     )
                 )
-            
+
             # Search filter
             if search_query and search_query.strip():
                 search_pattern = f"%{search_query.strip()}%"
@@ -183,10 +183,10 @@ class OrderService:
                         Order.receiver_phone.ilike(search_pattern)
                     )
                 )
-            
+
             if conditions:
                 query = query.filter(and_(*conditions))
-            
+
             orders = query.all()
             return orders
         except Exception as e:
@@ -194,26 +194,26 @@ class OrderService:
             return []
         finally:
             session.close()
-    
+
     def get_unique_provinces(self):
         """Get list of unique provinces from all orders."""
         session: Session = SessionLocal()
         try:
             sender_provinces = session.query(Order.sender_province).distinct().all()
             receiver_provinces = session.query(Order.receiver_province).distinct().all()
-            
+
             all_provinces = set()
             for (prov,) in sender_provinces + receiver_provinces:
                 if prov and prov.strip():
                     all_provinces.add(prov.strip())
-            
+
             return sorted(list(all_provinces))
         except Exception as e:
             print(f"Error getting provinces: {e}")
             return []
         finally:
             session.close()
-    
+
     def update_order_status(self, order_id, new_status, changed_by=None, note=None):
         """
         Update the status of a specific order and record history.
@@ -224,7 +224,7 @@ class OrderService:
             if order:
                 old_status = order.status
                 order.status = new_status
-                
+
                 # Record status change history
                 from models.order_status_history import OrderStatusHistory
                 history = OrderStatusHistory(
@@ -360,7 +360,7 @@ class OrderService:
                 order.shipping_cost = float(data.get('shipping_cost', order.shipping_cost or 0))
                 order.has_cod = data.get('has_cod', order.has_cod)
                 order.cod_amount = float(data.get('cod_amount', order.cod_amount or 0))
-                
+
                 session.commit()
                 return True, f"Updated Order #{order.tracking_code} successfully"
             else:

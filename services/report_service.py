@@ -18,7 +18,7 @@ class ReportService:
         try:
             # 1. Query all data from the database
             orders = session.query(Order).all()
-            
+
             if not orders:
                 return False, "No data to export."
 
@@ -44,7 +44,7 @@ class ReportService:
             # 4. Save to Excel
             # index=False means we don't save the row numbers (0, 1, 2...)
             df.to_excel(file_path, index=False)
-            
+
             return True, f"Data exported successfully to {file_path}"
 
         except Exception as e:

@@ -18,7 +18,7 @@ class Action:
     old_data: Optional[dict]  # Data before action (for undo)
     new_data: Optional[dict]  # Data after action (for redo)
     timestamp: datetime = None
-    
+
     def __post_init__(self):
         if self.timestamp is None:
             self.timestamp = datetime.now()
@@ -26,15 +26,15 @@ class Action:
 
 class ActionHistoryManager:
     """Manages undo/redo history."""
-    
+
     _instance = None
-    
+
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super().__new__(cls)
             cls._instance._initialized = False
         return cls._instance
-    
+
     def __init__(self, max_history: int = 50):
         if self._initialized:
             return
@@ -42,18 +42,18 @@ class ActionHistoryManager:
         self.max_history = max_history
         self.undo_stack = deque(maxlen=max_history)
         self.redo_stack = deque(maxlen=max_history)
-    
+
     def record_action(self, action: Action):
         """Record a new action, clearing redo stack."""
         self.undo_stack.append(action)
         self.redo_stack.clear()  # Clear redo when new action is performed
-    
+
     def can_undo(self) -> bool:
         return len(self.undo_stack) > 0
-    
+
     def can_redo(self) -> bool:
         return len(self.redo_stack) > 0
-    
+
     def undo(self) -> Optional[Action]:
         """Get the last action to undo."""
         if self.can_undo():
@@ -61,7 +61,7 @@ class ActionHistoryManager:
             self.redo_stack.append(action)
             return action
         return None
-    
+
     def redo(self) -> Optional[Action]:
         """Get the last undone action to redo."""
         if self.can_redo():
@@ -69,26 +69,26 @@ class ActionHistoryManager:
             self.undo_stack.append(action)
             return action
         return None
-    
+
     def clear(self):
         """Clear all history."""
         self.undo_stack.clear()
         self.redo_stack.clear()
-    
+
     def get_undo_description(self) -> str:
         """Get description of action that would be undone."""
         if self.can_undo():
             action = self.undo_stack[-1]
             return self._get_action_description(action, "Hoàn tác")
         return "Không có gì để hoàn tác"
-    
+
     def get_redo_description(self) -> str:
         """Get description of action that would be redone."""
         if self.can_redo():
             action = self.redo_stack[-1]
             return self._get_action_description(action, "Làm lại")
         return "Không có gì để làm lại"
-    
+
     def _get_action_description(self, action: Action, prefix: str) -> str:
         """Generate human-readable action description."""
         action_names = {

@@ -27,13 +27,13 @@ class AuthService:
         session: Session = SessionLocal()
         try:
             user = session.query(User).filter(User.username == username).first()
-            
+
             if not user:
                 return False, "Tên đăng nhập không tồn tại"
-            
+
             if not self.verify_password(password, user.password_hash):
                 return False, "Mật khẩu không đúng"
-            
+
             # Return user data as dict to avoid session issues
             user_data = {
                 'id': user.id,
@@ -43,7 +43,7 @@ class AuthService:
                 'is_admin': user.is_admin()
             }
             return True, user_data
-            
+
         except Exception as e:
             return False, f"Lỗi đăng nhập: {str(e)}"
         finally:
@@ -60,7 +60,7 @@ class AuthService:
             existing = session.query(User).filter(User.username == data.get('username')).first()
             if existing:
                 return False, "Tên đăng nhập đã tồn tại"
-            
+
             new_user = User(
                 username=data.get('username'),
                 password_hash=self.hash_password(data.get('password')),
@@ -99,7 +99,7 @@ class AuthService:
                     admin_count = session.query(User).filter(User.role == 'admin').count()
                     if admin_count <= 1:
                         return False, "Không thể xoá admin cuối cùng"
-                
+
                 username = user.username
                 session.delete(user)
                 session.commit()

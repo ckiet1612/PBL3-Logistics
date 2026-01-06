@@ -28,7 +28,7 @@ if getattr(sys, 'frozen', False):
     DB_PATH = os.path.join(BASE_DIR, "logistics.db")
 else:
     # Go up one level from 'database/' to project root
-    PROJECT_ROOT = os.path.dirname(BASE_DIR) 
+    PROJECT_ROOT = os.path.dirname(BASE_DIR)
     DB_PATH = os.path.join(PROJECT_ROOT, "logistics.db")
 
 DATABASE_URL = f"sqlite:///{DB_PATH}"

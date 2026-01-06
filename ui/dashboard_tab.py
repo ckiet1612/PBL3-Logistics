@@ -8,7 +8,7 @@ class DashboardTab(QWidget):
     def __init__(self):
         super().__init__()
         self.layout = QVBoxLayout(self)
-        
+
         # Create a Matplotlib Figure
         self.figure = Figure(figsize=(5, 4), dpi=100)
         self.canvas = FigureCanvas(self.figure)
@@ -21,7 +21,7 @@ class DashboardTab(QWidget):
         # 1. Process Data: Count orders by Status
         status_counts = {}
         total_revenue = 0.0
-        
+
         for order in orders:
             status = order.status or "Unknown"
             status_counts[status] = status_counts.get(status, 0) + 1
@@ -30,10 +30,10 @@ class DashboardTab(QWidget):
         # 2. Prepare data for plotting
         labels = list(status_counts.keys())
         sizes = list(status_counts.values())
-        
+
         # 3. Clear previous chart
         self.figure.clear()
-        
+
         # 4. Draw Pie Chart
         ax = self.figure.add_subplot(111)
         if sizes:

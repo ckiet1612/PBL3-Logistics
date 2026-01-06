@@ -1,0 +1,42 @@
+[MAIN]
+# Specify a configuration file.
+#rcfile=
+
+# Python code to execute, usually for sys.path manipulation such as pygtk.require().
+#init-hook=
+
+# Add files or directories to the ignore list.
+ignore=venv,__pycache__
+
+[MESSAGES CONTROL]
+# Disable specific messages that are not relevant for this project
+disable=
+    E0401,  # import-error (PyQt6 imports work at runtime)
+    E0611,  # no-name-in-module (PyQt6 modules)
+    C0114,  # missing-module-docstring
+    C0115,  # missing-class-docstring
+    C0116,  # missing-function-docstring
+    R0801,  # duplicate-code (too restrictive for UI code)
+    R0902,  # too-many-instance-attributes
+    R0903,  # too-few-public-methods
+    R0914,  # too-many-locals
+    C0415,  # import-outside-toplevel
+    W0718,  # broad-exception-caught
+    C0321,  # multiple-statements
+
+[FORMAT]
+# Maximum number of characters on a single line.
+max-line-length=120
+
+[DESIGN]
+# Maximum number of arguments for function / method.
+max-args=10
+
+# Maximum number of locals for function / method body.
+max-locals=20
+
+# Maximum number of return / yield for function / method body.
+max-returns=6
+
+# Maximum number of branch for function / method body.
+max-branches=15

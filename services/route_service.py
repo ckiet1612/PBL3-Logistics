@@ -8,7 +8,7 @@ from models.order import Order
 
 class RouteService:
     """Service for route CRUD and shipping cost calculation."""
-    
+
     def get_all_routes(self):
         """Get all routes."""
         session: Session = SessionLocal()
@@ -16,7 +16,7 @@ class RouteService:
             return session.query(Route).order_by(Route.origin_province, Route.dest_province).all()
         finally:
             session.close()
-    
+
     def get_route_by_id(self, route_id):
         """Get route by ID."""
         session: Session = SessionLocal()
@@ -24,7 +24,7 @@ class RouteService:
             return session.query(Route).filter(Route.id == route_id).first()
         finally:
             session.close()
-    
+
     def find_route(self, origin, dest):
         """Find route by origin and destination."""
         session: Session = SessionLocal()
@@ -34,7 +34,7 @@ class RouteService:
             ).first()
         finally:
             session.close()
-    
+
     def create_route(self, data):
         """Create new route."""
         session: Session = SessionLocal()
@@ -46,10 +46,10 @@ class RouteService:
                     Route.dest_province == data.get('dest_province')
                 )
             ).first()
-            
+
             if existing:
                 return False, "Tuyến đường này đã tồn tại"
-            
+
             route = Route(
                 origin_province=data.get('origin_province'),
                 dest_province=data.get('dest_province'),
@@ -66,7 +66,7 @@ class RouteService:
             return False, f"Lỗi: {e}"
         finally:
             session.close()
-    
+
     def update_route(self, route_id, data):
         """Update route."""
         session: Session = SessionLocal()
@@ -87,7 +87,7 @@ class RouteService:
             return False, f"Lỗi: {e}"
         finally:
             session.close()
-    
+
     def delete_route(self, route_id):
         """Delete route."""
         session: Session = SessionLocal()
@@ -103,7 +103,7 @@ class RouteService:
             return False, f"Lỗi: {e}"
         finally:
             session.close()
-    
+
     def calculate_shipping_cost(self, origin, dest, weight_kg):
         """Calculate shipping cost for a route."""
         route = self.find_route(origin, dest)
@@ -111,14 +111,14 @@ class RouteService:
             return route.calculate_shipping_cost(weight_kg)
         # Default cost if no route found
         return weight_kg * 10000  # 10,000 VND/kg default
-    
+
     def get_route_stats(self):
         """Get statistics for routes."""
         session: Session = SessionLocal()
         try:
             routes = session.query(Route).all()
             stats = []
-            
+
             for route in routes:
                 # Count orders on this route
                 order_count = session.query(Order).filter(
@@ -127,12 +127,12 @@ class RouteService:
                         Order.receiver_province == route.dest_province
                     )
                 ).count()
-                
+
                 stats.append({
                     'route': route,
                     'order_count': order_count
                 })
-            
+
             # Sort by order_count descending
             stats.sort(key=lambda x: x['order_count'], reverse=True)
             return stats
