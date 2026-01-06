@@ -17,7 +17,7 @@ class AddRouteDialog(QDialog):
         super().__init__(parent)
         self.route_data = route_data
         self.setWindowTitle("Sửa tuyến" if route_data else "Thêm tuyến mới")
-        self.setFixedSize(420, 380)
+        self.setFixedSize(340, 290)
         self.setup_ui()
 
         if route_data:
