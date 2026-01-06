@@ -224,24 +224,34 @@ class WarehouseTab(QWidget):
             # ID
             id_item = QTableWidgetItem(str(wh.id))
             id_item.setData(Qt.ItemDataRole.UserRole, wh.id)
+            id_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
             self.table.setItem(row_idx, 0, id_item)
             
             # Name
-            self.table.setItem(row_idx, 1, QTableWidgetItem(wh.name))
+            name_item = QTableWidgetItem(wh.name)
+            name_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+            self.table.setItem(row_idx, 1, name_item)
             
             # Province
-            self.table.setItem(row_idx, 2, QTableWidgetItem(wh.province or ""))
+            province_item = QTableWidgetItem(wh.province or "")
+            province_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+            self.table.setItem(row_idx, 2, province_item)
             
             # Capacity
-            self.table.setItem(row_idx, 3, QTableWidgetItem(str(wh.capacity)))
+            capacity_item = QTableWidgetItem(str(wh.capacity))
+            capacity_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+            self.table.setItem(row_idx, 3, capacity_item)
             
             # Current orders
             stats = self.service.get_warehouse_stats(wh.id)
             order_count = stats['order_count'] if stats else 0
-            self.table.setItem(row_idx, 4, QTableWidgetItem(str(order_count)))
+            order_item = QTableWidgetItem(str(order_count))
+            order_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+            self.table.setItem(row_idx, 4, order_item)
             
             # Status
             status_item = QTableWidgetItem(wh.get_status_display())
+            status_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
             if wh.status == 'active':
                 status_item.setForeground(Qt.GlobalColor.darkGreen)
             elif wh.status == 'maintenance':

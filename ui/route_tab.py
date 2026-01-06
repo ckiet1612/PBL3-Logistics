@@ -243,25 +243,38 @@ class RouteTab(QWidget):
             # ID
             id_item = QTableWidgetItem(str(route.id))
             id_item.setData(Qt.ItemDataRole.UserRole, route.id)
+            id_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
             self.table.setItem(row_idx, 0, id_item)
             
             # Origin
-            self.table.setItem(row_idx, 1, QTableWidgetItem(route.origin_province))
+            origin_item = QTableWidgetItem(route.origin_province)
+            origin_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+            self.table.setItem(row_idx, 1, origin_item)
             
             # Destination
-            self.table.setItem(row_idx, 2, QTableWidgetItem(route.dest_province))
+            dest_item = QTableWidgetItem(route.dest_province)
+            dest_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+            self.table.setItem(row_idx, 2, dest_item)
             
             # Distance
-            self.table.setItem(row_idx, 3, QTableWidgetItem(f"{route.distance_km:.0f} km"))
+            dist_item = QTableWidgetItem(f"{route.distance_km:.0f} km")
+            dist_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+            self.table.setItem(row_idx, 3, dist_item)
             
             # Est hours
-            self.table.setItem(row_idx, 4, QTableWidgetItem(f"{route.est_hours:.1f} giờ"))
+            time_item = QTableWidgetItem(f"{route.est_hours:.1f} giờ")
+            time_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+            self.table.setItem(row_idx, 4, time_item)
             
             # Base price
-            self.table.setItem(row_idx, 5, QTableWidgetItem(f"{route.base_price:,.0f} VND"))
+            price_item = QTableWidgetItem(f"{route.base_price:,.0f} VND")
+            price_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+            self.table.setItem(row_idx, 5, price_item)
             
             # Order count
-            self.table.setItem(row_idx, 6, QTableWidgetItem(str(order_count)))
+            count_item = QTableWidgetItem(str(order_count))
+            count_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+            self.table.setItem(row_idx, 6, count_item)
         
         self.lbl_footer.setText(f"Tổng: {len(stats)} tuyến")
     

@@ -173,17 +173,29 @@ class UserManagementTab(QWidget):
         self.table.setRowCount(0)
         for row_idx, user in enumerate(users):
             self.table.insertRow(row_idx)
-            self.table.setItem(row_idx, 0, QTableWidgetItem(str(user.id)))
-            self.table.setItem(row_idx, 1, QTableWidgetItem(user.username))
-            self.table.setItem(row_idx, 2, QTableWidgetItem(user.full_name or ""))
+            
+            id_item = QTableWidgetItem(str(user.id))
+            id_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+            self.table.setItem(row_idx, 0, id_item)
+            
+            username_item = QTableWidgetItem(user.username)
+            username_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+            self.table.setItem(row_idx, 1, username_item)
+            
+            fullname_item = QTableWidgetItem(user.full_name or "")
+            fullname_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+            self.table.setItem(row_idx, 2, fullname_item)
             
             role_item = QTableWidgetItem(user.role.upper())
+            role_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
             if user.role == 'admin':
                 role_item.setForeground(Qt.GlobalColor.darkGreen)
             self.table.setItem(row_idx, 3, role_item)
             
             created = user.created_at.strftime("%d/%m/%Y %H:%M") if user.created_at else ""
-            self.table.setItem(row_idx, 4, QTableWidgetItem(created))
+            created_item = QTableWidgetItem(created)
+            created_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+            self.table.setItem(row_idx, 4, created_item)
 
     def add_user(self):
         """Open dialog to add new user."""
