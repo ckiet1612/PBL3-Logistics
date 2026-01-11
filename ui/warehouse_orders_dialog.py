@@ -1,20 +1,21 @@
 # ui/warehouse_orders_dialog.py
-from PyQt6.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QLabel,
+from PyQt6.QtWidgets import (QVBoxLayout, QHBoxLayout, QLabel,
                               QPushButton, QTableWidget, QTableWidgetItem,
                               QHeaderView)
 from PyQt6.QtCore import Qt
 from services.warehouse_service import WarehouseService
+from ui.base_dialog import BaseDialog
+from ui.constants import BUTTON_STYLE_NEUTRAL, HEADER_STYLE, INFO_STYLE, TABLE_STYLE
 
 
-class WarehouseOrdersDialog(QDialog):
+class WarehouseOrdersDialog(BaseDialog):
     """Dialog to display orders in a warehouse."""
 
     def __init__(self, parent=None, warehouse_id=None, warehouse_name=""):
-        super().__init__(parent)
+        title = f"Đơn hàng trong kho: {warehouse_name}"
+        super().__init__(parent, title=title, min_width=700, min_height=450)
         self.warehouse_id = warehouse_id
         self.warehouse_name = warehouse_name
-        self.setWindowTitle(f"Đơn hàng trong kho: {warehouse_name}")
-        self.setMinimumSize(700, 450)
         self.service = WarehouseService()
         self.setup_ui()
         self.load_orders()
@@ -27,7 +28,7 @@ class WarehouseOrdersDialog(QDialog):
         # Header
         header_layout = QHBoxLayout()
         header = QLabel(f"🏭 {self.warehouse_name}")
-        header.setStyleSheet("font-size: 18px; font-weight: bold;")
+        header.setStyleSheet(HEADER_STYLE)
         header_layout.addWidget(header)
 
         header_layout.addStretch()
@@ -36,7 +37,7 @@ class WarehouseOrdersDialog(QDialog):
         stats = self.service.get_warehouse_stats(self.warehouse_id)
         if stats:
             stats_label = QLabel(f"📦 {stats['order_count']}/{stats['capacity']} ({stats['capacity_pct']:.0f}%)")
-            stats_label.setStyleSheet("font-size: 14px; color: #666;")
+            stats_label.setStyleSheet(INFO_STYLE)
             header_layout.addWidget(stats_label)
 
         layout.addLayout(header_layout)
@@ -59,43 +60,20 @@ class WarehouseOrdersDialog(QDialog):
         self.table.setAlternatingRowColors(True)
         self.table.verticalHeader().setVisible(False)
         self.table.verticalHeader().setDefaultSectionSize(35)
-        self.table.setStyleSheet("""
-            QTableWidget {
-                gridline-color: #ccc;
-                border: 1px solid #bbb;
-                background-color: white;
-                alternate-background-color: #f9f9f9;
-            }
-            QTableWidget::item { padding: 6px; }
-            QHeaderView::section {
-                background-color: #e8e8e8;
-                padding: 8px;
-                border: none;
-                border-bottom: 2px solid #666;
-                font-weight: bold;
-            }
-        """)
+        self.table.setStyleSheet(TABLE_STYLE)
         layout.addWidget(self.table)
 
         # Footer
         footer_layout = QHBoxLayout()
 
         self.lbl_count = QLabel("Tổng: 0 đơn")
-        self.lbl_count.setStyleSheet("font-size: 13px; color: #555;")
+        self.lbl_count.setStyleSheet(INFO_STYLE)
         footer_layout.addWidget(self.lbl_count)
 
         footer_layout.addStretch()
 
         btn_close = QPushButton("Đóng")
-        btn_close.setStyleSheet("""
-            QPushButton {
-                background-color: #607D8B;
-                color: white;
-                padding: 8px 20px;
-                border-radius: 4px;
-            }
-            QPushButton:hover { background-color: #546E7A; }
-        """)
+        btn_close.setStyleSheet(BUTTON_STYLE_NEUTRAL)
         btn_close.clicked.connect(self.close)
         footer_layout.addWidget(btn_close)
 

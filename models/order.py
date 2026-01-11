@@ -1,6 +1,7 @@
 # models/order.py
-from sqlalchemy import Column, Integer, String, Float, DateTime, Text, Boolean, ForeignKey
 from datetime import datetime
+
+from sqlalchemy import Column, Integer, String, Float, DateTime, Text, Boolean, ForeignKey
 from models.base import Base
 
 class Order(Base):

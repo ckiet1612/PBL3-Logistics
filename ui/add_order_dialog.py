@@ -1,20 +1,49 @@
 # ui/add_order_dialog.py
-from PyQt6.QtWidgets import (QDialog, QVBoxLayout, QFormLayout, QHBoxLayout,
-                             QLineEdit, QDialogButtonBox, QDoubleSpinBox,
-                             QCheckBox, QComboBox, QSpinBox, QTextEdit,
-                             QTabWidget, QWidget, QLabel, QScrollArea, QCompleter,
+from PyQt6.QtWidgets import (QVBoxLayout, QFormLayout,
+                             QLineEdit, QDoubleSpinBox, QCheckBox, QComboBox,
+                             QSpinBox, QTextEdit, QWidget, QLabel, QCompleter,
                              QPushButton)
 from PyQt6.QtCore import Qt
 from services.transport_service import TransportService
 from services.ward_service import WardService
+from ui.base_dialog import BaseDialog
 from ui.constants import (VIETNAM_PROVINCES, ITEM_TYPE_MAP,
-                          SERVICE_TYPE_MAP, PAYMENT_TYPE_MAP)
+                          SERVICE_TYPE_MAP, PAYMENT_TYPE_MAP,
+                          BUTTON_STYLE_SECONDARY_SMALL)
 
-class AddOrderDialog(QDialog):
+class AddOrderDialog(BaseDialog):
     def __init__(self, parent=None):
-        super().__init__(parent)
-        self.setWindowTitle("Thêm đơn hàng mới")
-        self.setMinimumSize(650, 600)
+        super().__init__(parent, title="Thêm đơn hàng mới", min_width=650, min_height=600)
+
+        # Initialize attributes (pylint W0201 fix)
+        self.txt_tracking = None
+        self.cmb_order_type = None
+        self.cmb_warehouse = None
+        self.txt_sender_name = None
+        self.txt_sender_phone = None
+        self.txt_sender_email = None
+        self.txt_sender_address = None
+        self.cmb_sender_province = None
+        self.cmb_sender_ward = None
+        self.txt_receiver_name = None
+        self.txt_receiver_phone = None
+        self.txt_receiver_email = None
+        self.txt_receiver_address = None
+        self.cmb_receiver_province = None
+        self.cmb_receiver_ward = None
+        self.txt_item_name = None
+        self.cmb_item_type = None
+        self.spin_package_count = None
+        self.spin_weight = None
+        self.txt_dimensions = None
+        self.txt_delivery_note = None
+        self.cmb_service_type = None
+        self.cmb_payment_type = None
+        self.lbl_route_info = None
+        self.spin_cost = None
+        self.btn_auto_calc = None
+        self.chk_cod = None
+        self.spin_cod_amount = None
 
         self.transport_service = TransportService()
         self.setup_ui()
@@ -22,9 +51,8 @@ class AddOrderDialog(QDialog):
     def setup_ui(self):
         layout = QVBoxLayout(self)
 
-        # Tab widget for organizing fields
-        self.tabs = QTabWidget()
-        layout.addWidget(self.tabs)
+        # Tab widget - using BaseDialog helper
+        self.setup_tabs(layout)
 
         # Tab 1: Basic Info
         self.setup_basic_tab()
@@ -41,16 +69,8 @@ class AddOrderDialog(QDialog):
         # Tab 5: Service & Payment
         self.setup_service_tab()
 
-        # Buttons
-        self.buttons = QDialogButtonBox(
-            QDialogButtonBox.StandardButton.Save |
-            QDialogButtonBox.StandardButton.Cancel
-        )
-        self.buttons.button(QDialogButtonBox.StandardButton.Save).setText("Lưu")
-        self.buttons.button(QDialogButtonBox.StandardButton.Cancel).setText("Huỷ")
-        self.buttons.accepted.connect(self.accept)
-        self.buttons.rejected.connect(self.reject)
-        layout.addWidget(self.buttons)
+        # Buttons - using BaseDialog helper
+        self.setup_buttons(layout)
 
     def setup_basic_tab(self):
         """Tab for basic order information."""
@@ -223,7 +243,7 @@ class AddOrderDialog(QDialog):
         cost_layout.addWidget(self.spin_cost)
 
         self.btn_auto_calc = QPushButton("⚡ Tính phí")
-        self.btn_auto_calc.setStyleSheet("background-color: #2196F3; color: white; padding: 5px 10px;")
+        self.btn_auto_calc.setStyleSheet(BUTTON_STYLE_SECONDARY_SMALL)
         self.btn_auto_calc.clicked.connect(self.auto_calculate_cost)
         cost_layout.addWidget(self.btn_auto_calc)
         form.addRow("Phí vận chuyển:", cost_layout)
@@ -342,13 +362,7 @@ class AddOrderDialog(QDialog):
         if not self.txt_tracking.text():
             self.txt_tracking.setText(f"#DH{random.randint(1000,9999)}")
 
-    def set_combo_value(self, combo, value):
-        """Set combo box value, adding if not exists."""
-        idx = combo.findText(value)
-        if idx >= 0:
-            combo.setCurrentIndex(idx)
-        else:
-            combo.setCurrentText(value)
+    # set_combo_value is inherited from BaseDialog
 
     def on_sender_province_changed(self, province):
         """Update sender ward dropdown when province changes."""

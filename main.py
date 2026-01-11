@@ -35,28 +35,40 @@ def main():
     # Create default admin if needed (for first run)
     auth_service.create_default_admin()
 
-    # Show Login Dialog
-    login_dialog = LoginDialog(auth_service)
+    # Main loop for login/logout
+    while True:
+        # Show Login Dialog
+        login_dialog = LoginDialog(auth_service)
 
-    if login_dialog.exec():
-        # Login successful - get user data
-        user_data = login_dialog.get_user_data()
+        if login_dialog.exec():
+            # Login successful - get user data
+            user_data = login_dialog.get_user_data()
 
-        # Initialize the Controller with user data
-        controller = MainController(user_data=user_data, auth_service=auth_service)
+            # Initialize the Controller with user data
+            controller = MainController(user_data=user_data, auth_service=auth_service)
 
-        # Connect logout signal
-        def handle_logout():
-            controller.view.close()
-            # Restart login
-            main()
+            # Flag for logout
+            logout_flag = [False]
 
-        controller.view.logout_requested.connect(handle_logout)
+            def handle_logout():
+                logout_flag[0] = True
+                controller.view.close()
 
-        sys.exit(app.exec())
-    else:
-        # Login cancelled
-        sys.exit(0)
+            controller.view.logout_requested.connect(handle_logout)
+
+            # Run main window
+            app.exec()
+
+            # If logout was requested, continue loop to show login again
+            if logout_flag[0]:
+                continue
+            else:
+                break
+        else:
+            # Login cancelled
+            break
+
+    sys.exit(0)
 
 if __name__ == "__main__":
     main()

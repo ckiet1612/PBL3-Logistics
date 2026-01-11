@@ -1,17 +1,17 @@
 # ui/warehouse_select_dialog.py
-from PyQt6.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QLabel,
-                              QPushButton, QListWidget, QListWidgetItem,
+from PyQt6.QtWidgets import (QVBoxLayout, QLabel, QListWidget, QListWidgetItem,
                               QLineEdit, QDialogButtonBox)
 from PyQt6.QtCore import Qt
 from services.warehouse_service import WarehouseService
+from ui.base_dialog import BaseDialog
+from ui.constants import LIST_STYLE, HEADER_STYLE_SMALL
 
 
-class WarehouseSelectDialog(QDialog):
+class WarehouseSelectDialog(BaseDialog):
     """Dialog to search and select a warehouse."""
 
     def __init__(self, parent=None, order_count=1):
-        super().__init__(parent)
-        self.setWindowTitle("Chọn kho đích")
+        super().__init__(parent, title="Chọn kho đích", min_width=400, min_height=450)
         self.setFixedSize(400, 450)
         self.service = WarehouseService()
         self.selected_warehouse_id = None
@@ -26,7 +26,7 @@ class WarehouseSelectDialog(QDialog):
 
         # Header
         header = QLabel(f"🏭 Chuyển {self.order_count} đơn hàng vào kho")
-        header.setStyleSheet("font-size: 16px; font-weight: bold;")
+        header.setStyleSheet(HEADER_STYLE_SMALL)
         layout.addWidget(header)
 
         # Search box
@@ -45,24 +45,7 @@ class WarehouseSelectDialog(QDialog):
 
         # Warehouse list
         self.list_warehouses = QListWidget()
-        self.list_warehouses.setStyleSheet("""
-            QListWidget {
-                border: 1px solid #ccc;
-                border-radius: 4px;
-                font-size: 14px;
-            }
-            QListWidget::item {
-                padding: 10px;
-                border-bottom: 1px solid #eee;
-            }
-            QListWidget::item:selected {
-                background-color: #4CAF50;
-                color: white;
-            }
-            QListWidget::item:hover {
-                background-color: #e8f5e9;
-            }
-        """)
+        self.list_warehouses.setStyleSheet(LIST_STYLE)
         self.list_warehouses.itemDoubleClicked.connect(self.accept)
         layout.addWidget(self.list_warehouses)
 

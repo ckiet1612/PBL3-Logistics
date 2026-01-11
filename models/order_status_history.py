@@ -1,7 +1,7 @@
 # models/order_status_history.py
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
-from sqlalchemy.orm import relationship
 from datetime import datetime
+
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
 from models.base import Base
 
 

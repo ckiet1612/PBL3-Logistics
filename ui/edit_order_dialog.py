@@ -1,18 +1,45 @@
 # ui/edit_order_dialog.py
-from PyQt6.QtWidgets import (QDialog, QVBoxLayout, QFormLayout, QHBoxLayout,
-                             QLineEdit, QDialogButtonBox, QDoubleSpinBox,
-                             QCheckBox, QComboBox, QSpinBox, QTextEdit,
-                             QTabWidget, QWidget, QLabel, QPushButton)
+from PyQt6.QtWidgets import (QVBoxLayout, QFormLayout, QHBoxLayout,
+                             QLineEdit, QDoubleSpinBox, QCheckBox, QComboBox,
+                             QSpinBox, QTextEdit, QWidget, QLabel, QPushButton)
 from PyQt6.QtCore import Qt
+from ui.base_dialog import BaseDialog
 from ui.constants import (VIETNAM_PROVINCES, ITEM_TYPE_MAP,
-                          SERVICE_TYPE_MAP, PAYMENT_TYPE_MAP)
+                          SERVICE_TYPE_MAP, PAYMENT_TYPE_MAP,
+                          BUTTON_STYLE_SECONDARY_SMALL)
 
-class EditOrderDialog(QDialog):
+class EditOrderDialog(BaseDialog):
     def __init__(self, order_data, parent=None):
-        super().__init__(parent)
+        title = f"Sửa đơn hàng - {order_data.get('tracking_code', '')}"
+        super().__init__(parent, title=title, min_width=650, min_height=600)
         self.order_data = order_data
-        self.setWindowTitle(f"Sửa đơn hàng - {order_data.get('tracking_code', '')}")
-        self.setMinimumSize(650, 600)
+
+        # Initialize attributes (pylint W0201 fix)
+        self.txt_tracking = None
+        self.cmb_order_type = None
+        self.txt_sender_name = None
+        self.txt_sender_phone = None
+        self.txt_sender_email = None
+        self.txt_sender_address = None
+        self.cmb_sender_province = None
+        self.txt_receiver_name = None
+        self.txt_receiver_phone = None
+        self.txt_receiver_email = None
+        self.txt_receiver_address = None
+        self.cmb_receiver_province = None
+        self.txt_item_name = None
+        self.cmb_item_type = None
+        self.spin_package_count = None
+        self.spin_weight = None
+        self.txt_dimensions = None
+        self.txt_delivery_note = None
+        self.cmb_service_type = None
+        self.cmb_payment_type = None
+        self.lbl_route_info = None
+        self.spin_cost = None
+        self.btn_auto_calc = None
+        self.chk_cod = None
+        self.spin_cod_amount = None
 
         self.setup_ui()
         self.fill_data()
@@ -20,15 +47,11 @@ class EditOrderDialog(QDialog):
     def setup_ui(self):
         layout = QVBoxLayout(self)
 
-        # Header
-        header = QLabel(f"✏️ Chỉnh sửa đơn hàng")
-        header.setStyleSheet("font-size: 18px; font-weight: bold;")
-        header.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(header)
+        # Header - using BaseDialog helper
+        self.create_header(layout, "Chỉnh sửa đơn hàng", "✏️")
 
-        # Tab widget
-        self.tabs = QTabWidget()
-        layout.addWidget(self.tabs)
+        # Tab widget - using BaseDialog helper
+        self.setup_tabs(layout)
 
         self.setup_basic_tab()
         self.setup_sender_tab()
@@ -36,16 +59,8 @@ class EditOrderDialog(QDialog):
         self.setup_package_tab()
         self.setup_service_tab()
 
-        # Buttons
-        self.buttons = QDialogButtonBox(
-            QDialogButtonBox.StandardButton.Save |
-            QDialogButtonBox.StandardButton.Cancel
-        )
-        self.buttons.button(QDialogButtonBox.StandardButton.Save).setText("Lưu")
-        self.buttons.button(QDialogButtonBox.StandardButton.Cancel).setText("Huỷ")
-        self.buttons.accepted.connect(self.accept)
-        self.buttons.rejected.connect(self.reject)
-        layout.addWidget(self.buttons)
+        # Buttons - using BaseDialog helper
+        self.setup_buttons(layout)
 
     def setup_basic_tab(self):
         tab = QWidget()
@@ -173,7 +188,7 @@ class EditOrderDialog(QDialog):
         cost_layout.addWidget(self.spin_cost)
 
         self.btn_auto_calc = QPushButton("⚡ Tính phí")
-        self.btn_auto_calc.setStyleSheet("background-color: #2196F3; color: white; padding: 5px 10px;")
+        self.btn_auto_calc.setStyleSheet(BUTTON_STYLE_SECONDARY_SMALL)
         self.btn_auto_calc.clicked.connect(self.auto_calculate_cost)
         cost_layout.addWidget(self.btn_auto_calc)
         form.addRow("Phí vận chuyển:", cost_layout)
@@ -268,13 +283,7 @@ class EditOrderDialog(QDialog):
         self.spin_cod_amount.setEnabled(has_cod)
         self.spin_cod_amount.setValue(data.get('cod_amount', 0))
 
-    def set_combo_value(self, combo, value):
-        """Set combo box value, adding if not exists."""
-        idx = combo.findText(value)
-        if idx >= 0:
-            combo.setCurrentIndex(idx)
-        else:
-            combo.setCurrentText(value)
+    # set_combo_value is inherited from BaseDialog
 
     def get_data(self):
         """Return all form data as dictionary."""

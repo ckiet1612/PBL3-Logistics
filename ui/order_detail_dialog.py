@@ -1,10 +1,11 @@
 # ui/order_detail_dialog.py
-from PyQt6.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QLabel,
+from PyQt6.QtWidgets import (QVBoxLayout, QHBoxLayout, QLabel,
                               QScrollArea, QWidget, QFrame, QPushButton,
                               QGridLayout)
 from PyQt6.QtCore import Qt
+from ui.base_dialog import BaseDialog
 
-class OrderDetailDialog(QDialog):
+class OrderDetailDialog(BaseDialog):
     """Dialog to display all order information."""
 
     # Mapping for display labels
@@ -14,10 +15,9 @@ class OrderDetailDialog(QDialog):
     PAYMENT_TYPE_LABELS = {'sender': 'Người gửi trả', 'receiver': 'Người nhận trả'}
 
     def __init__(self, order_data, parent=None):
-        super().__init__(parent)
+        title = f"Chi tiết đơn hàng - {order_data.get('tracking_code', '')}"
+        super().__init__(parent, title=title, min_width=600, min_height=700)
         self.order_data = order_data
-        self.setWindowTitle(f"Chi tiết đơn hàng - {order_data.get('tracking_code', '')}")
-        self.setMinimumSize(600, 700)
         self.setup_ui()
 
     def setup_ui(self):
@@ -89,7 +89,8 @@ class OrderDetailDialog(QDialog):
         total_cost = shipping_cost + (self.order_data.get('cod_amount', 0) if has_cod else 0)
 
         self.add_section(scroll_layout, "💰 Thanh toán", [
-            ("Hình thức thanh toán", self.PAYMENT_TYPE_LABELS.get(self.order_data.get('payment_type'), 'Người gửi trả')),
+            ("Hình thức thanh toán",
+             self.PAYMENT_TYPE_LABELS.get(self.order_data.get('payment_type'), 'Người gửi trả')),
             ("Phí vận chuyển", f"{shipping_cost:,.0f} VND"),
             ("Thu hộ (COD)", cod_text),
             ("TỔNG CỘNG", f"{total_cost:,.0f} VND"),
@@ -158,7 +159,8 @@ class OrderDetailDialog(QDialog):
             'Cancelled': '#F44336'
         }
         color = colors.get(status, '#666')
-        return f"font-size: 14px; font-weight: bold; color: white; background-color: {color}; padding: 5px 15px; border-radius: 12px;"
+        return (f"font-size: 14px; font-weight: bold; color: white; "
+                f"background-color: {color}; padding: 5px 15px; border-radius: 12px;")
 
     def add_timeline_section(self, layout):
         """Add timeline section showing status history."""

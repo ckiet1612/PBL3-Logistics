@@ -1,16 +1,16 @@
 # ui/user_management_tab.py
 from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel,
                               QPushButton, QTableWidget, QTableWidgetItem,
-                              QHeaderView, QDialog, QLineEdit, QComboBox,
-                              QFormLayout, QMessageBox, QMenu)
+                              QHeaderView, QLineEdit, QFormLayout, QMessageBox)
 from PyQt6.QtCore import Qt
-from ui.constants import (BUTTON_STYLE_GREEN, BUTTON_STYLE_GRAY, TABLE_STYLE)
+from ui.base_dialog import BaseDialog
+from ui.constants import (BUTTON_STYLE_GREEN, BUTTON_STYLE_GRAY, TABLE_STYLE,
+                          HEADER_STYLE_LARGE)
 
-class AddUserDialog(QDialog):
+class AddUserDialog(BaseDialog):
     """Dialog to add a new user."""
     def __init__(self, parent=None):
-        super().__init__(parent)
-        self.setWindowTitle("Thêm tài khoản mới")
+        super().__init__(parent, title="Thêm tài khoản mới", min_width=350, min_height=250)
         self.setFixedSize(350, 250)
         self.setup_ui()
 
@@ -19,36 +19,25 @@ class AddUserDialog(QDialog):
         layout.setSpacing(10)
         layout.setContentsMargins(20, 20, 20, 20)
 
-        # Username
-        self.txt_username = QLineEdit()
-        self.txt_username.setPlaceholderText("Nhập tên đăng nhập")
+        # Username - using BaseDialog helper
+        self.txt_username = self.create_text_input(placeholder="Nhập tên đăng nhập")
         layout.addRow("Tên đăng nhập:", self.txt_username)
 
-        # Password
-        self.txt_password = QLineEdit()
-        self.txt_password.setPlaceholderText("Nhập mật khẩu")
+        # Password - using BaseDialog helper with password mode
+        self.txt_password = self.create_text_input(placeholder="Nhập mật khẩu")
         self.txt_password.setEchoMode(QLineEdit.EchoMode.Password)
         layout.addRow("Mật khẩu:", self.txt_password)
 
-        # Full Name
-        self.txt_fullname = QLineEdit()
-        self.txt_fullname.setPlaceholderText("Nhập tên đầy đủ")
+        # Full Name - using BaseDialog helper
+        self.txt_fullname = self.create_text_input(placeholder="Nhập tên đầy đủ")
         layout.addRow("Họ và tên:", self.txt_fullname)
 
-        # Role
-        self.cmb_role = QComboBox()
-        self.cmb_role.addItems(["staff", "admin"])
+        # Role - using BaseDialog helper
+        self.cmb_role = self.create_combo_with_items(["staff", "admin"])
         layout.addRow("Vai trò:", self.cmb_role)
 
-        # Buttons
-        btn_layout = QHBoxLayout()
-        self.btn_save = QPushButton("Lưu")
-        self.btn_save.clicked.connect(self.accept)
-        self.btn_cancel = QPushButton("Huỷ")
-        self.btn_cancel.clicked.connect(self.reject)
-        btn_layout.addWidget(self.btn_save)
-        btn_layout.addWidget(self.btn_cancel)
-        layout.addRow(btn_layout)
+        # Buttons - using BaseDialog helper
+        self.setup_custom_buttons(layout)
 
     def get_data(self):
         return {
@@ -76,7 +65,7 @@ class UserManagementTab(QWidget):
         # Header
         header_layout = QHBoxLayout()
         title_label = QLabel("👥 Quản lý tài khoản")
-        title_label.setStyleSheet("font-size: 20px; font-weight: bold;")
+        title_label.setStyleSheet(HEADER_STYLE_LARGE)
         header_layout.addWidget(title_label)
 
         header_layout.addStretch()
@@ -120,27 +109,8 @@ class UserManagementTab(QWidget):
         self.table.verticalHeader().setVisible(False)
         self.table.verticalHeader().setDefaultSectionSize(40)
 
-        # Use simple consistent styling from MainWindow
-        self.table.setStyleSheet("""
-            QTableWidget {
-                gridline-color: #ddd;
-                border: 1px solid #ccc;
-                background-color: white;
-                alternate-background-color: #f9f9f9;
-            }
-            QTableWidget::item {
-                padding-left: 5px;
-            }
-            QHeaderView::section {
-                background-color: #e8e8e8;
-                padding: 10px 8px;
-                border: none;
-                border-bottom: 2px solid #666;
-                border-right: 1px solid #ccc;
-                font-weight: bold;
-                font-size: 13px;
-            }
-        """)
+        # Use consistent styling from constants
+        self.table.setStyleSheet(TABLE_STYLE)
         self.table.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.table.customContextMenuRequested.connect(self.show_context_menu)
         layout.addWidget(self.table)

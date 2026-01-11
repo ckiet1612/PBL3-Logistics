@@ -1,6 +1,7 @@
 # models/user.py
-from sqlalchemy import Column, Integer, String, DateTime
 from datetime import datetime
+
+from sqlalchemy import Column, Integer, String, DateTime
 from models.base import Base
 
 class User(Base):

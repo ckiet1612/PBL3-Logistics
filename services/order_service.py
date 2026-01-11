@@ -148,14 +148,24 @@ class OrderService:
         from datetime import datetime, timedelta
         from sqlalchemy import and_, or_
 
+        # Map Vietnamese status to English (database values)
+        status_map = {
+            "Mới tạo": "New",
+            "Đang xử lý": "Processing",
+            "Đang giao": "Shipping",
+            "Đã giao": "Delivered",
+            "Đã hủy": "Cancelled"
+        }
+
         session: Session = SessionLocal()
         try:
             query = session.query(Order)
             conditions = []
 
-            # Status filter
+            # Status filter - convert Vietnamese to English
             if status and status != "Tất cả trạng thái":
-                conditions.append(Order.status == status)
+                english_status = status_map.get(status, status)
+                conditions.append(Order.status == english_status)
 
             # Date filter
             if days > 0:
@@ -176,7 +186,7 @@ class OrderService:
                 search_pattern = f"%{search_query.strip()}%"
                 conditions.append(
                     or_(
-                        Order.id.like(search_pattern),
+                        Order.tracking_code.ilike(search_pattern),
                         Order.sender_name.ilike(search_pattern),
                         Order.receiver_name.ilike(search_pattern),
                         Order.sender_phone.ilike(search_pattern),

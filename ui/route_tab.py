@@ -1,22 +1,22 @@
 # ui/route_tab.py
 from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel,
                               QPushButton, QTableWidget, QTableWidgetItem,
-                              QHeaderView, QDialog, QComboBox,
-                              QFormLayout, QMessageBox, QDoubleSpinBox,
-                              QMenu)
+                              QHeaderView, QFormLayout, QMessageBox, QMenu)
 from PyQt6.QtCore import Qt
 from services.route_service import RouteService
-from ui.constants import (VIETNAM_PROVINCES, BUTTON_STYLE_GREEN,
-                          BUTTON_STYLE_GRAY, TABLE_STYLE)
+from ui.base_dialog import BaseDialog
+from ui.constants import (BUTTON_STYLE_GREEN,
+                          BUTTON_STYLE_GRAY, TABLE_STYLE,
+                          HEADER_STYLE_LARGE, FOOTER_STYLE)
 
 
 
-class AddRouteDialog(QDialog):
+class AddRouteDialog(BaseDialog):
     """Dialog to add/edit route."""
     def __init__(self, parent=None, route_data=None):
-        super().__init__(parent)
+        title = "Sửa tuyến" if route_data else "Thêm tuyến mới"
+        super().__init__(parent, title=title, min_width=340, min_height=290)
         self.route_data = route_data
-        self.setWindowTitle("Sửa tuyến" if route_data else "Thêm tuyến mới")
         self.setFixedSize(340, 290)
         self.setup_ui()
 
@@ -28,70 +28,40 @@ class AddRouteDialog(QDialog):
         layout.setSpacing(12)
         layout.setContentsMargins(20, 20, 20, 20)
 
-        # Origin Province
-        self.cmb_origin = QComboBox()
-        self.cmb_origin.addItems(VIETNAM_PROVINCES)
+        # Origin/Destination Province - using BaseDialog helper
+        self.cmb_origin = self.create_province_combo(with_completer=False)
         layout.addRow("Tỉnh xuất phát:", self.cmb_origin)
 
-        # Destination Province
-        self.cmb_dest = QComboBox()
-        self.cmb_dest.addItems(VIETNAM_PROVINCES)
+        self.cmb_dest = self.create_province_combo(with_completer=False)
         layout.addRow("Tỉnh đích:", self.cmb_dest)
 
-        # Distance
-        self.spin_distance = QDoubleSpinBox()
-        self.spin_distance.setRange(0, 5000)
-        self.spin_distance.setDecimals(1)
-        self.spin_distance.setSuffix(" km")
+        # Distance - using BaseDialog helper
+        self.spin_distance = self.create_double_spin_box(0, 5000, 0, 1, " km")
         layout.addRow("Khoảng cách:", self.spin_distance)
 
         # Estimated hours
-        self.spin_hours = QDoubleSpinBox()
-        self.spin_hours.setRange(0, 100)
-        self.spin_hours.setDecimals(1)
-        self.spin_hours.setSuffix(" giờ")
+        self.spin_hours = self.create_double_spin_box(0, 100, 0, 1, " giờ")
         layout.addRow("Thời gian dự kiến:", self.spin_hours)
 
         # Base price
-        self.spin_base_price = QDoubleSpinBox()
-        self.spin_base_price.setRange(0, 10000000)
-        self.spin_base_price.setDecimals(0)
+        self.spin_base_price = self.create_double_spin_box(0, 10000000, 0, 0, " VND")
         self.spin_base_price.setSingleStep(10000)
-        self.spin_base_price.setSuffix(" VND")
         layout.addRow("Giá cước cơ bản:", self.spin_base_price)
 
         # Price per kg
-        self.spin_price_per_kg = QDoubleSpinBox()
-        self.spin_price_per_kg.setRange(0, 100000)
-        self.spin_price_per_kg.setDecimals(0)
+        self.spin_price_per_kg = self.create_double_spin_box(0, 100000, 5000, 0, " VND/kg")
         self.spin_price_per_kg.setSingleStep(1000)
-        self.spin_price_per_kg.setValue(5000)
-        self.spin_price_per_kg.setSuffix(" VND/kg")
         layout.addRow("Phí theo cân:", self.spin_price_per_kg)
 
-        # Buttons
-        btn_layout = QHBoxLayout()
-        self.btn_save = QPushButton("Lưu")
-        self.btn_save.setStyleSheet("background-color: #4CAF50; color: white; padding: 8px 20px;")
-        self.btn_save.clicked.connect(self.accept)
-
-        self.btn_cancel = QPushButton("Huỷ")
-        self.btn_cancel.clicked.connect(self.reject)
-
-        btn_layout.addWidget(self.btn_save)
-        btn_layout.addWidget(self.btn_cancel)
-        layout.addRow(btn_layout)
+        # Buttons - using BaseDialog helper
+        self.setup_custom_buttons(layout)
 
     def load_data(self):
         """Load existing route data."""
         if self.route_data:
-            idx = self.cmb_origin.findText(self.route_data.origin_province or "")
-            if idx >= 0:
-                self.cmb_origin.setCurrentIndex(idx)
-
-            idx = self.cmb_dest.findText(self.route_data.dest_province or "")
-            if idx >= 0:
-                self.cmb_dest.setCurrentIndex(idx)
+            # Using BaseDialog set_combo_value
+            self.set_combo_value(self.cmb_origin, self.route_data.origin_province)
+            self.set_combo_value(self.cmb_dest, self.route_data.dest_province)
 
             self.spin_distance.setValue(self.route_data.distance_km or 0)
             self.spin_hours.setValue(self.route_data.est_hours or 0)
@@ -125,7 +95,7 @@ class RouteTab(QWidget):
         # Header
         header_layout = QHBoxLayout()
         title_label = QLabel("🛣️ Quản lý Tuyến đường")
-        title_label.setStyleSheet("font-size: 20px; font-weight: bold;")
+        title_label.setStyleSheet(HEADER_STYLE_LARGE)
         header_layout.addWidget(title_label)
 
         header_layout.addStretch()
@@ -173,27 +143,8 @@ class RouteTab(QWidget):
         self.table.verticalHeader().setVisible(False)
         self.table.verticalHeader().setDefaultSectionSize(40)
 
-        # Use simple consistent styling from MainWindow
-        self.table.setStyleSheet("""
-            QTableWidget {
-                gridline-color: #ddd;
-                border: 1px solid #ccc;
-                background-color: white;
-                alternate-background-color: #f9f9f9;
-            }
-            QTableWidget::item {
-                padding-left: 5px;
-            }
-            QHeaderView::section {
-                background-color: #e8e8e8;
-                padding: 10px 8px;
-                border: none;
-                border-bottom: 2px solid #666;
-                border-right: 1px solid #ccc;
-                font-weight: bold;
-                font-size: 13px;
-            }
-        """)
+        # Use consistent styling from constants
+        self.table.setStyleSheet(TABLE_STYLE)
         self.table.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.table.customContextMenuRequested.connect(self.show_context_menu)
         self.table.doubleClicked.connect(self.edit_route)
@@ -203,7 +154,7 @@ class RouteTab(QWidget):
         # Footer
         self.lbl_footer = QLabel("Tổng: 0 tuyến")
         self.lbl_footer.setAlignment(Qt.AlignmentFlag.AlignRight)
-        self.lbl_footer.setStyleSheet("font-size: 13px; color: #555; padding: 5px 10px;")
+        self.lbl_footer.setStyleSheet(FOOTER_STYLE)
         layout.addWidget(self.lbl_footer)
 
     def load_routes(self):

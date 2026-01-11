@@ -1,16 +1,15 @@
 # ui/login_dialog.py
-from PyQt6.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QLabel,
-                              QLineEdit, QPushButton, QMessageBox)
+from PyQt6.QtWidgets import QVBoxLayout, QLabel, QLineEdit, QPushButton
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QFont
+from ui.base_dialog import BaseDialog
+from ui.constants import BUTTON_STYLE_PRIMARY, ERROR_STYLE
 
-class LoginDialog(QDialog):
+class LoginDialog(BaseDialog):
     def __init__(self, auth_service, parent=None):
-        super().__init__(parent)
+        super().__init__(parent, title="Đăng nhập - Logistics System", min_width=400, min_height=250)
         self.auth_service = auth_service
         self.user_data = None
-
-        self.setWindowTitle("Đăng nhập - Logistics System")
         self.setFixedSize(400, 250)
         self.setModal(True)
 
@@ -44,23 +43,13 @@ class LoginDialog(QDialog):
         # Login Button
         self.btn_login = QPushButton("Đăng nhập")
         self.btn_login.setMinimumHeight(40)
-        self.btn_login.setStyleSheet("""
-            QPushButton {
-                background-color: #4CAF50;
-                color: white;
-                font-weight: bold;
-                border-radius: 5px;
-            }
-            QPushButton:hover {
-                background-color: #45a049;
-            }
-        """)
+        self.btn_login.setStyleSheet(BUTTON_STYLE_PRIMARY)
         self.btn_login.clicked.connect(self.handle_login)
         layout.addWidget(self.btn_login)
 
         # Error label
         self.lbl_error = QLabel("")
-        self.lbl_error.setStyleSheet("color: red;")
+        self.lbl_error.setStyleSheet(ERROR_STYLE)
         self.lbl_error.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(self.lbl_error)
 

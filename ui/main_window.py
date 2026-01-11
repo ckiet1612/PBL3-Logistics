@@ -3,8 +3,11 @@ from PyQt6.QtWidgets import (QMainWindow, QWidget, QVBoxLayout,
                              QPushButton, QTableWidget, QHBoxLayout,
                              QHeaderView, QLabel, QLineEdit, QComboBox,
                              QListWidget, QListWidgetItem, QStackedWidget, QSplitter)
-from PyQt6.QtCore import pyqtSignal, Qt, QSize
+from PyQt6.QtCore import pyqtSignal, Qt
 from ui.dashboard_tab import DashboardTab
+from ui.constants import (BUTTON_STYLE_DANGER, BUTTON_STYLE_NEUTRAL,
+                          SIDEBAR_STYLE, HEADER_STYLE,
+                          FOOTER_STYLE, USER_INFO_STYLE)
 
 class MainWindow(QMainWindow):
     logout_requested = pyqtSignal()  # Signal for logout
@@ -37,24 +40,14 @@ class MainWindow(QMainWindow):
         # User info
         role_text = "👑 Admin" if self.is_admin else "👤 Staff"
         user_label = QLabel(f"{role_text}: {self.user_data.get('full_name', self.user_data.get('username', 'User'))}")
-        user_label.setStyleSheet("font-size: 14px; font-weight: bold; color: #333;")
+        user_label.setStyleSheet(USER_INFO_STYLE)
         user_bar.addWidget(user_label)
 
         user_bar.addStretch()
 
         # Logout button
         self.btn_logout = QPushButton("🚪 Đăng xuất")
-        self.btn_logout.setStyleSheet("""
-            QPushButton {
-                background-color: #f44336;
-                color: white;
-                padding: 5px 15px;
-                border-radius: 3px;
-            }
-            QPushButton:hover {
-                background-color: #da190b;
-            }
-        """)
+        self.btn_logout.setStyleSheet(BUTTON_STYLE_DANGER)
         self.btn_logout.clicked.connect(self.logout_requested.emit)
         user_bar.addWidget(self.btn_logout)
 
@@ -69,29 +62,7 @@ class MainWindow(QMainWindow):
         # --- LEFT SIDEBAR ---
         self.sidebar = QListWidget()
         self.sidebar.setFixedWidth(180)
-        self.sidebar.setStyleSheet("""
-            QListWidget {
-                background-color: #f5f5f5;
-                border: 1px solid #ddd;
-                border-radius: 8px;
-                font-size: 14px;
-                padding: 3px;
-            }
-            QListWidget::item {
-                color: #333;
-                padding: 10px 8px;
-                margin: 1px 0;
-                border-radius: 6px;
-            }
-            QListWidget::item:selected {
-                background-color: #4CAF50;
-                color: white;
-            }
-            QListWidget::item:hover:!selected {
-                background-color: #2196F3;
-                color: white;
-            }
-        """)
+        self.sidebar.setStyleSheet(SIDEBAR_STYLE)
 
         # Add sidebar items
         self.sidebar.addItem(QListWidgetItem("📦 Quản lý Đơn"))
@@ -150,7 +121,7 @@ class MainWindow(QMainWindow):
         # Header
         header_layout = QHBoxLayout()
         title_label = QLabel("📦 Quản lý Đơn hàng")
-        title_label.setStyleSheet("font-size: 18px; font-weight: bold;")
+        title_label.setStyleSheet(HEADER_STYLE)
         header_layout.addWidget(title_label)
 
         header_layout.addStretch()
@@ -175,16 +146,7 @@ class MainWindow(QMainWindow):
         self.btn_toggle_filter = QPushButton("⚙️ Bộ lọc")
         self.btn_toggle_filter.setCheckable(True)
         self.btn_toggle_filter.setChecked(False)
-        self.btn_toggle_filter.setStyleSheet("""
-            QPushButton {
-                background-color: #607D8B;
-                color: white;
-                padding: 5px 12px;
-                border-radius: 4px;
-            }
-            QPushButton:hover { background-color: #546E7A; }
-            QPushButton:checked { background-color: #455A64; }
-        """)
+        self.btn_toggle_filter.setStyleSheet(BUTTON_STYLE_NEUTRAL)
         self.btn_toggle_filter.clicked.connect(self.toggle_filter_panel)
         header_layout.addWidget(self.btn_toggle_filter)
 
@@ -200,7 +162,7 @@ class MainWindow(QMainWindow):
 
         # Status filter
         self.filter_status = QComboBox()
-        self.filter_status.addItems(["Tất cả trạng thái", "Đang xử lý", "Đang giao", "Đã giao", "Đã hủy"])
+        self.filter_status.addItems(["Tất cả trạng thái", "Mới tạo", "Đang xử lý", "Đang giao", "Đã giao", "Đã hủy"])
         self.filter_status.setMinimumWidth(130)
         filter_layout.addWidget(self.filter_status)
 
@@ -218,15 +180,7 @@ class MainWindow(QMainWindow):
 
         # Clear filter button
         self.btn_clear_filter = QPushButton("🗑️ Xoá lọc")
-        self.btn_clear_filter.setStyleSheet("""
-            QPushButton {
-                background-color: #f44336;
-                color: white;
-                padding: 5px 12px;
-                border-radius: 3px;
-            }
-            QPushButton:hover { background-color: #d32f2f; }
-        """)
+        self.btn_clear_filter.setStyleSheet(BUTTON_STYLE_DANGER)
         filter_layout.addWidget(self.btn_clear_filter)
 
         filter_layout.addStretch()
@@ -302,9 +256,9 @@ class MainWindow(QMainWindow):
         layout.addWidget(self.table)
 
         # Quick Stats Footer
-        self.lbl_quick_stats = QLabel("📦 Tổng: 0 | 🆕 Mới: 0 | 🚚 Đang giao: 0 | ✅ Đã giao: 0")
+        self.lbl_quick_stats = QLabel("📦 Tổng: 0 | 🆕 Mới: 0 | ⏳ Đang xử lý: 0 | 🚚 Đang giao: 0 | ✅ Đã giao: 0")
         self.lbl_quick_stats.setAlignment(Qt.AlignmentFlag.AlignRight)
-        self.lbl_quick_stats.setStyleSheet("font-size: 13px; color: #555; padding: 5px 10px;")
+        self.lbl_quick_stats.setStyleSheet(FOOTER_STYLE)
         layout.addWidget(self.lbl_quick_stats)
 
         # Action Buttons

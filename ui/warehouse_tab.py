@@ -1,22 +1,22 @@
 # ui/warehouse_tab.py
 from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel,
                               QPushButton, QTableWidget, QTableWidgetItem,
-                              QHeaderView, QDialog, QLineEdit, QComboBox,
-                              QFormLayout, QMessageBox, QSpinBox, QTextEdit,
-                              QMenu, QProgressBar)
+                              QHeaderView, QFormLayout, QMessageBox, QMenu)
 from PyQt6.QtCore import Qt
 from services.warehouse_service import WarehouseService
-from ui.constants import (VIETNAM_PROVINCES, BUTTON_STYLE_GREEN,
-                          BUTTON_STYLE_GRAY, TABLE_STYLE)
+from ui.base_dialog import BaseDialog
+from ui.constants import (BUTTON_STYLE_GREEN,
+                          BUTTON_STYLE_GRAY, TABLE_STYLE,
+                          HEADER_STYLE_LARGE, FOOTER_STYLE)
 
 
 
-class AddWarehouseDialog(QDialog):
+class AddWarehouseDialog(BaseDialog):
     """Dialog to add/edit warehouse."""
     def __init__(self, parent=None, warehouse_data=None):
-        super().__init__(parent)
+        title = "Sửa kho" if warehouse_data else "Thêm kho mới"
+        super().__init__(parent, title=title, min_width=400, min_height=350)
         self.warehouse_data = warehouse_data
-        self.setWindowTitle("Sửa kho" if warehouse_data else "Thêm kho mới")
         self.setFixedSize(400, 350)
         self.setup_ui()
 
@@ -28,45 +28,28 @@ class AddWarehouseDialog(QDialog):
         layout.setSpacing(12)
         layout.setContentsMargins(20, 20, 20, 20)
 
-        # Name
-        self.txt_name = QLineEdit()
-        self.txt_name.setPlaceholderText("Nhập tên kho")
+        # Name - using BaseDialog helper
+        self.txt_name = self.create_text_input(placeholder="Nhập tên kho")
         layout.addRow("Tên kho:", self.txt_name)
 
-        # Address
-        self.txt_address = QTextEdit()
-        self.txt_address.setMaximumHeight(60)
-        self.txt_address.setPlaceholderText("Địa chỉ chi tiết")
+        # Address - using BaseDialog helper
+        self.txt_address = self.create_text_area(placeholder="Địa chỉ chi tiết", max_height=60)
         layout.addRow("Địa chỉ:", self.txt_address)
 
-        # Province
-        self.cmb_province = QComboBox()
-        self.cmb_province.addItems(VIETNAM_PROVINCES)
+        # Province - using BaseDialog helper
+        self.cmb_province = self.create_province_combo(with_completer=False)
         layout.addRow("Tỉnh/Thành:", self.cmb_province)
 
-        # Capacity
-        self.spin_capacity = QSpinBox()
-        self.spin_capacity.setRange(1, 10000)
-        self.spin_capacity.setValue(100)
+        # Capacity - using BaseDialog helper
+        self.spin_capacity = self.create_spin_box(min_val=1, max_val=10000, default=100)
         layout.addRow("Sức chứa (đơn):", self.spin_capacity)
 
-        # Status
-        self.cmb_status = QComboBox()
-        self.cmb_status.addItems(["Hoạt động", "Bảo trì", "Đóng cửa"])
+        # Status - using BaseDialog helper
+        self.cmb_status = self.create_combo_with_items(["Hoạt động", "Bảo trì", "Đóng cửa"])
         layout.addRow("Trạng thái:", self.cmb_status)
 
-        # Buttons
-        btn_layout = QHBoxLayout()
-        self.btn_save = QPushButton("Lưu")
-        self.btn_save.setStyleSheet("background-color: #4CAF50; color: white; padding: 8px 20px;")
-        self.btn_save.clicked.connect(self.accept)
-
-        self.btn_cancel = QPushButton("Huỷ")
-        self.btn_cancel.clicked.connect(self.reject)
-
-        btn_layout.addWidget(self.btn_save)
-        btn_layout.addWidget(self.btn_cancel)
-        layout.addRow(btn_layout)
+        # Buttons - using BaseDialog helper
+        self.setup_custom_buttons(layout)
 
     def load_data(self):
         """Load existing warehouse data."""
@@ -74,9 +57,8 @@ class AddWarehouseDialog(QDialog):
             self.txt_name.setText(self.warehouse_data.name or "")
             self.txt_address.setPlainText(self.warehouse_data.address or "")
 
-            idx = self.cmb_province.findText(self.warehouse_data.province or "")
-            if idx >= 0:
-                self.cmb_province.setCurrentIndex(idx)
+            # Using BaseDialog set_combo_value
+            self.set_combo_value(self.cmb_province, self.warehouse_data.province)
 
             self.spin_capacity.setValue(self.warehouse_data.capacity or 100)
 
@@ -110,7 +92,7 @@ class WarehouseTab(QWidget):
         # Header
         header_layout = QHBoxLayout()
         title_label = QLabel("🏭 Quản lý Kho bãi")
-        title_label.setStyleSheet("font-size: 20px; font-weight: bold;")
+        title_label.setStyleSheet(HEADER_STYLE_LARGE)
         header_layout.addWidget(title_label)
 
         header_layout.addStretch()
@@ -157,27 +139,8 @@ class WarehouseTab(QWidget):
         self.table.verticalHeader().setVisible(False)
         self.table.verticalHeader().setDefaultSectionSize(40)
 
-        # Use simple consistent styling from MainWindow
-        self.table.setStyleSheet("""
-            QTableWidget {
-                gridline-color: #ddd;
-                border: 1px solid #ccc;
-                background-color: white;
-                alternate-background-color: #f9f9f9;
-            }
-            QTableWidget::item {
-                padding-left: 5px;
-            }
-            QHeaderView::section {
-                background-color: #e8e8e8;
-                padding: 10px 8px;
-                border: none;
-                border-bottom: 2px solid #666;
-                border-right: 1px solid #ccc;
-                font-weight: bold;
-                font-size: 13px;
-            }
-        """)
+        # Use consistent styling from constants
+        self.table.setStyleSheet(TABLE_STYLE)
         self.table.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.table.customContextMenuRequested.connect(self.show_context_menu)
         self.table.doubleClicked.connect(self.view_warehouse_orders)
@@ -187,7 +150,7 @@ class WarehouseTab(QWidget):
         # Footer
         self.lbl_footer = QLabel("Tổng: 0 kho")
         self.lbl_footer.setAlignment(Qt.AlignmentFlag.AlignRight)
-        self.lbl_footer.setStyleSheet("font-size: 13px; color: #555; padding: 5px 10px;")
+        self.lbl_footer.setStyleSheet(FOOTER_STYLE)
         layout.addWidget(self.lbl_footer)
 
     def load_warehouses(self):
